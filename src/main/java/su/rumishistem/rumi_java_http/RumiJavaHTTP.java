@@ -28,6 +28,10 @@ public class RumiJavaHTTP {
 		this.rjh = this;
 	}
 
+	/**
+	 * クライアントから送信するデータの最大サイズを設定します
+	 * @param limit 最大サイズ
+	 */
 	public void set_request_body_limit(int limit) {
 		request_body_limit = limit;
 	}

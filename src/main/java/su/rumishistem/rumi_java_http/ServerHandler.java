@@ -1,6 +1,10 @@
 package su.rumishistem.rumi_java_http;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import io.netty.buffer.ByteBuf;
@@ -22,10 +26,13 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 		if (msg instanceof HttpRequest) {
 			//ヘッダー
 			HttpRequest r = (HttpRequest)msg;
-			HttpMethod netty_method = r.method();
+			System.out.println("[ INFO ] HTTP Request: " + r.uri());
 
+			Map<String, String> url_param = new HashMap();
 			request_body = new ByteArrayOutputStream();
 
+			//メソッド
+			HttpMethod netty_method = r.method();
 			Method method = Method.GET;
 			switch (netty_method.asciiName().toUpperCase().toString()) {
 				case "GET":
@@ -44,10 +51,27 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 					throw new UnsupportedOperationException(netty_method.name());
 			}
 
+			//URL
+			String path = r.uri();
+			int param_index = path.indexOf('?');
+			if (param_index >= 0) {
+				String up = path.substring(param_index + 1);
+				path = path.substring(0, param_index);
+
+				//パラメーター
+				for (String param:up.split("&")) {
+					int index = param.indexOf('=');
+					String key = URLDecoder.decode(param.substring(0, index), StandardCharsets.UTF_8);
+					String value = URLDecoder.decode(param.substring(index + 1), StandardCharsets.UTF_8);
+					url_param.put(key, value);
+				}
+			}
+
 			current_request = new Request(
 				ctx,
 				method,
-				r.uri(),
+				path,
+				url_param,
 				request_body
 			);
 		} else if (msg instanceof HttpContent) {
