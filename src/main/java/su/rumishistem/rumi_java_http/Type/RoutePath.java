@@ -7,22 +7,25 @@ import java.util.regex.Pattern;
 
 public class RoutePath {
 	private String path = null;
+	private Method method;
 
 	private boolean is_regex = false;
 	private Pattern regex = null;
 	private List<String> param_name_list = null;
 
-	public RoutePath(Pattern regex, List<String> param_name_list) {
+	public RoutePath(Pattern regex, Method method, List<String> param_name_list) {
 		this.is_regex = true;
 		this.regex = regex;
 		this.param_name_list = param_name_list;
+		this.method = method;
 	}
 
-	public RoutePath(String path) {
+	public RoutePath(String path, Method method) {
 		this.path = path;
+		this.method = method;
 	}
 
-	public RouteResult check(String request_path) {
+	public RouteResult check(String request_path, Method request_method) {
 		if (!request_path.startsWith("/")) request_path = "/" + request_path;
 		if (request_path.endsWith("/")) request_path = request_path.substring(0, request_path.length() - 1);
 
@@ -46,6 +49,12 @@ public class RoutePath {
 		} else {
 			result.success = path.equals(request_path);
 			result.param = new HashMap<>();
+		}
+
+		if (method != null) {
+			if (!method.equals(request_method)) {
+				result.success = false;
+			}
 		}
 
 		return result;

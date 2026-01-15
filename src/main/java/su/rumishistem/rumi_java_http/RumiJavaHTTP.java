@@ -10,12 +10,11 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import su.rumishistem.rumi_java_http.Type.RouteEntry;
-import su.rumishistem.rumi_java_http.Type.RoutePath;
-import su.rumishistem.rumi_java_http.Type.RouteResult;
+import su.rumishistem.rumi_java_http.Type.*;
 
 public class RumiJavaHTTP {
 	private int port;
+	private int request_body_limit = 1024 * 1024;//1MB
 	private RumiJavaHTTP rjh;
 
 	private Map<RoutePath, RouteEntry> route_table = new HashMap<>();
@@ -29,7 +28,17 @@ public class RumiJavaHTTP {
 		this.rjh = this;
 	}
 
-	public void set_route(String path, RouteEntry entry) {
+	public void set_request_body_limit(int limit) {
+		request_body_limit = limit;
+	}
+
+	/**
+	 * ルーティングの設定をします
+	 * @param path パス
+	 * @param method メソッド(null OK)
+	 * @param entry エントリーポイント
+	 */
+	public void set_route(String path, Method method, RouteEntry entry) {
 		if (!path.startsWith("/")) path = "/" + path;
 		if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
 
@@ -50,9 +59,9 @@ public class RumiJavaHTTP {
 				param_name_list.add(param_name);
 			}
 
-			route_table.put(new RoutePath(regex, param_name_list), entry);
+			route_table.put(new RoutePath(regex, method, param_name_list), entry);
 		} else {
-			route_table.put(new RoutePath(path), entry);
+			route_table.put(new RoutePath(path, method), entry);
 		}
 	}
 
@@ -72,7 +81,6 @@ public class RumiJavaHTTP {
 				protected void initChannel(SocketChannel ch) throws Exception {
 					ChannelPipeline p = ch.pipeline();
 					p.addLast(new HttpServerCodec());
-					p.addLast(new HttpObjectAggregator(65536));
 					p.addLast(new ChunkedWriteHandler());
 					p.addLast(new ServerHandler(rjh));
 				};
@@ -91,5 +99,9 @@ public class RumiJavaHTTP {
 
 	protected Map<RoutePath, RouteEntry> get_route_table() {
 		return route_table;
+	}
+
+	protected long get_request_body_limit() {
+		return request_body_limit;
 	}
 }
