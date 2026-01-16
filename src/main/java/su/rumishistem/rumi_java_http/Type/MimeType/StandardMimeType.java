@@ -7,17 +7,15 @@ public class StandardMimeType {
 		public static final MimeType OctetStream = new MimeType("application", "octet-stream", new HashMap<>());
 		public static final MimeType ZIP = new MimeType("application", "zip", new HashMap<>());
 		public static final MimeType PDF = new MimeType("application", "pdf", new HashMap<>());
+
+		public static final MimeType JSON = new MimeType("application", "json", new HashMap<>() {{ put("charset", "UTF-8"); }});
 	}
 
+	/**
+	 * UTF-8
+	 */
 	public class Text {
-		/**
-		 * プレーンテキストUTF-8
-		 */
 		public static final MimeType Plain = new MimeType("text", "plain", new HashMap<>() {{ put("charset", "UTF-8"); }});
-
-		/**
-		 * HTML UTF-8
-		 */
 		public static final MimeType HTML = new MimeType("text", "html", new HashMap<>() {{ put("charset", "UTF-8"); }});
 	}
 
