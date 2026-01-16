@@ -2,6 +2,9 @@ package su.rumishistem.rumi_java_http.Type.MimeType;
 
 import java.util.Map;
 import java.util.Map.Entry;
+
+import su.rumishistem.rumi_java_http.Tool.MimeTypeBuilder;
+
 import java.util.Set;
 
 public class MimeType {

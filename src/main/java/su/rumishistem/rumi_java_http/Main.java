@@ -1,5 +1,6 @@
 package su.rumishistem.rumi_java_http;
 
+import su.rumishistem.rumi_java_http.Tool.RSV.RSVEndpointError;
 import su.rumishistem.rumi_java_http.Type.ErrorCode;
 import su.rumishistem.rumi_java_http.Type.Method;
 import su.rumishistem.rumi_java_http.Type.Request;
@@ -23,6 +24,7 @@ public class Main {
 				sb.append("/					：これ\n");
 				sb.append("/streaming		：ストリーミングテスト\n");
 				sb.append("/post				：POSTテスト\n");
+				sb.append("/error				：エラーテスト\n");
 
 				return new Response(200, sb.toString().getBytes(), StandardMimeType.Text.Plain);
 			}
@@ -61,6 +63,13 @@ public class Main {
 			}
 		});
 
+		http.set_route("/error", Method.GET, new RouteEntry() {
+			@Override
+			public Response run(Request r) throws Exception {
+				throw new RuntimeException("エラーのテスト");
+			}
+		});
+
 		http.set_route("/post", Method.POST, new RouteEntry() {
 			@Override
 			public Response run(Request r) {
@@ -74,6 +83,8 @@ public class Main {
 				return new Response(404, (r.get_path() + "というページはないよ").getBytes(), StandardMimeType.Text.Plain);
 			}
 		});
+
+		http.set_error_page(ErrorCode.InternalServerError, "/", new RSVEndpointError());
 
 		http.start();
 	}

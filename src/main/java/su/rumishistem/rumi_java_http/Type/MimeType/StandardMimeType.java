@@ -9,6 +9,7 @@ public class StandardMimeType {
 		public static final MimeType PDF = new MimeType("application", "pdf", new HashMap<>());
 
 		public static final MimeType JSON = new MimeType("application", "json", new HashMap<>() {{ put("charset", "UTF-8"); }});
+		public static final MimeType RSDF = new MimeType("application", "rsdf", new HashMap<>());
 	}
 
 	/**

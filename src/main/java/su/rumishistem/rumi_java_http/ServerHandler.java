@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
+import su.rumishistem.rumi_java_http.Tool.ExceptionToString;
 import su.rumishistem.rumi_java_http.Type.*;
 import su.rumishistem.rumi_java_http.Type.MimeType.StandardMimeType;
 
@@ -124,7 +125,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 			try {
 				current_request.set_ex(ex);
 				route_response = get_error_page_entry(ErrorCode.InternalServerError, current_request.get_path()).run(current_request);
-			} catch (Exception EX) {
+			} catch (Exception ex2) {
 				//500自体がエラーを吐いた場合
 				route_response = new RouteEntry() {
 					@Override
@@ -161,7 +162,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 				return new RouteEntry() {
 					@Override
 					public Response run(Request r) {
-						return new Response(500, "500 Internal Server Error".getBytes(), StandardMimeType.Text.Plain);
+						return new Response(500, ("500 Internal Server Error\n" + ExceptionToString.get(r.get_ex())).getBytes(), StandardMimeType.Text.Plain);
 					}
 				};
 			case PageNotFound:
