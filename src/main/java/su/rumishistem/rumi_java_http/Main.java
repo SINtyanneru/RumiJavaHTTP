@@ -1,5 +1,6 @@
 package su.rumishistem.rumi_java_http;
 
+import su.rumishistem.rumi_java_http.Type.ErrorCode;
 import su.rumishistem.rumi_java_http.Type.Method;
 import su.rumishistem.rumi_java_http.Type.Request;
 import su.rumishistem.rumi_java_http.Type.Response;
@@ -64,6 +65,13 @@ public class Main {
 			@Override
 			public Response run(Request r) {
 				return new Response(200, ("あなたの送ったデータ↓\n" + r.get_body().get_as_string()).getBytes(), StandardMimeType.Text.Plain);
+			}
+		});
+
+		http.set_error_page(ErrorCode.PageNotFound, "/", new RouteEntry() {
+			@Override
+			public Response run(Request r) throws Exception {
+				return new Response(404, (r.get_path() + "というページはないよ").getBytes(), StandardMimeType.Text.Plain);
 			}
 		});
 

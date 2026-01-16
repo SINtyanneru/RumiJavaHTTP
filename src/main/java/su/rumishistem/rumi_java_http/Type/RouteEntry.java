@@ -9,5 +9,5 @@ public interface RouteEntry {
 	 * @param r リクエスト
 	 * @return 応答(Nullを返すとHTTPRequest経由での応答が可能です)
 	 */
-	Response run(Request r);
+	Response run(Request r) throws Exception;
 }

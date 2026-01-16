@@ -11,6 +11,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.*;
 import su.rumishistem.rumi_java_http.Type.*;
+import su.rumishistem.rumi_java_http.Type.MimeType.StandardMimeType;
 
 public class ServerHandler extends ChannelInboundHandlerAdapter{
 	private RumiJavaHTTP rjh;
@@ -72,7 +73,8 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 				method,
 				path,
 				url_param,
-				request_body
+				request_body,
+				null
 			);
 		} else if (msg instanceof HttpContent) {
 			//ボディー
@@ -90,37 +92,92 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 			if (msg instanceof LastHttpContent) {
 				//終了
 				boolean exists_route = false;
-				Response route_response = null;
 
 				//ルートを見る
 				for (Entry<RoutePath, RouteEntry> entry:rjh.get_route_table().entrySet()) {
 					RouteResult result = entry.getKey().check(current_request.get_path(), current_request.get_method());
 					if (result.success) {
 						exists_route = true;
-						route_response = entry.getValue().run(current_request);
+						current_request.set_param(result.param);
+						run_entry(entry.getValue(), ctx);
 						break;
 					}
 				}
 
-				//ルートはあったｋか
-				if (exists_route) {
-					//応答はあるか(なければ放置)
-					if (route_response == null) return;
-
-					FullHttpResponse response = new DefaultFullHttpResponse(
-						HttpVersion.HTTP_1_1,
-						HttpResponseStatus.valueOf(route_response.code),
-						ctx.alloc().buffer().writeBytes(route_response.body)
-					);
-					response.headers().set(HttpHeaderNames.CONTENT_TYPE, route_response.mime_type.get_as_mimetype());
-					response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
-					ctx.writeAndFlush(response);
-				} else {
-					//404
+				//404
+				if (!exists_route) {
+					run_entry(get_error_page_entry(ErrorCode.PageNotFound, current_request.get_path()), ctx);
 				}
 
 				reset();
 			}
+		}
+	}
+
+	private void run_entry(RouteEntry entry, ChannelHandlerContext ctx) {
+		Response route_response;
+
+		try {
+			route_response = entry.run(current_request);
+		} catch (Exception ex) {
+			//500
+			try {
+				current_request.set_ex(ex);
+				route_response = get_error_page_entry(ErrorCode.InternalServerError, current_request.get_path()).run(current_request);
+			} catch (Exception EX) {
+				//500自体がエラーを吐いた場合
+				route_response = new RouteEntry() {
+					@Override
+					public Response run(Request r) {
+						return new Response(500, "500 Internal Server Error(RJH)".getBytes(), StandardMimeType.Text.Plain);
+					}
+				}.run(current_request);
+			}
+		}
+
+		if (route_response == null) return;
+
+		FullHttpResponse response = new DefaultFullHttpResponse(
+			HttpVersion.HTTP_1_1,
+			HttpResponseStatus.valueOf(route_response.code),
+			ctx.alloc().buffer().writeBytes(route_response.body)
+		);
+		response.headers().set(HttpHeaderNames.CONTENT_TYPE, route_response.mime_type.get_as_mimetype());
+		response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+		ctx.writeAndFlush(response);
+	}
+
+	private RouteEntry get_error_page_entry(ErrorCode error, String path) {
+		if (rjh.get_error_table(error) != null) {
+			for (Entry<String, RouteEntry> row:rjh.get_error_table(error)) {
+				if (path.startsWith(row.getKey())) {
+					return row.getValue();
+				}
+			}
+		}
+
+		switch (error) {
+			case InternalServerError:
+				return new RouteEntry() {
+					@Override
+					public Response run(Request r) {
+						return new Response(500, "500 Internal Server Error".getBytes(), StandardMimeType.Text.Plain);
+					}
+				};
+			case PageNotFound:
+				return new RouteEntry() {
+					@Override
+					public Response run(Request r) {
+						return new Response(404, "404 Page Not Found".getBytes(), StandardMimeType.Text.Plain);
+					}
+				};
+			default:
+				return new RouteEntry() {
+					@Override
+					public Response run(Request r) {
+						return new Response(500, "えらー".getBytes(), StandardMimeType.Text.Plain);
+					}
+				};
 		}
 	}
 

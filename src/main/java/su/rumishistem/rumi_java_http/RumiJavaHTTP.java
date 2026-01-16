@@ -1,6 +1,7 @@
 package su.rumishistem.rumi_java_http;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.*;
 
 import io.netty.bootstrap.ServerBootstrap;
@@ -18,6 +19,7 @@ public class RumiJavaHTTP {
 	private RumiJavaHTTP rjh;
 
 	private Map<RoutePath, RouteEntry> route_table = new HashMap<>();
+	private Map<ErrorCode, Set<Entry<String, RouteEntry>>> error_table = new HashMap<>();
 
 	/**
 	 * RJLから分離して書き直したHTTPサーバー
@@ -70,6 +72,21 @@ public class RumiJavaHTTP {
 	}
 
 	/**
+	 * エラーページを設定します。
+	 * @param error エラー
+	 * @param path パスの先頭
+	 * @param entry エントリーポイント
+	 */
+	public void set_error_page(ErrorCode error, String path, RouteEntry entry) {
+		if (!path.startsWith("/")) path = "/" + path;
+		if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
+
+		if (error_table.get(error) == null) error_table.put(error, new HashSet<>());
+
+		error_table.get(error).add(Map.entry(path, entry));
+	}
+
+	/**
 	 * サーバーを起動します。
 	 * @throws InterruptedException 
 	 */
@@ -103,6 +120,10 @@ public class RumiJavaHTTP {
 
 	protected Map<RoutePath, RouteEntry> get_route_table() {
 		return route_table;
+	}
+
+	protected Set<Entry<String, RouteEntry>> get_error_table(ErrorCode error) {
+		return error_table.get(error);
 	}
 
 	protected long get_request_body_limit() {

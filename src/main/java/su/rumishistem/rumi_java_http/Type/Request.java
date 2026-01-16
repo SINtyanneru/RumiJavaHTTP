@@ -12,13 +12,24 @@ public class Request {
 	private String path;
 	private Map<String, String> url_param;
 	private ByteArrayOutputStream body;
+	private Map<String, String> param;
+	private Exception ex;
 
-	public Request(ChannelHandlerContext ctx, Method method, String path, Map<String, String> url_param, ByteArrayOutputStream body) {
+	public Request(ChannelHandlerContext ctx, Method method, String path, Map<String, String> url_param, ByteArrayOutputStream body, Map<String, String> param) {
 		this.ctx = ctx;
 		this.method = method;
 		this.path = path;
 		this.url_param = url_param;
 		this.body = body;
+		this.param = param;
+	}
+
+	public void set_param(Map<String, String> param) {
+		this.param = param;
+	}
+
+	public void set_ex(Exception ex) {
+		this.ex = ex;
 	}
 
 	/**
@@ -56,10 +67,23 @@ public class Request {
 	}
 
 	/**
+	 * パラメーターを取得します。
+	 * @param key キー
+	 * @return 値
+	 */
+	public String get_param(String key) {
+		return param.get(key);
+	}
+
+	/**
 	 * リクエストボディーを取得します。
 	 * @return body
 	 */
 	public RequestBody get_body() {
 		return new RequestBody(body);
+	}
+
+	public Exception get_ex() {
+		return ex;
 	}
 }
