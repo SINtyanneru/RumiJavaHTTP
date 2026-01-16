@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandlerContext;
+import su.rumishistem.rumi_java_http.Type.MimeType.MimeType;
 
 public class Request {
 	private ChannelHandlerContext ctx;
@@ -41,7 +42,7 @@ public class Request {
 	 * 「「「絶対にreturn null;しろ。」」」
 	 * @return
 	 */
-	public StreamingWriter get_streaming(int code, String mime_type) {
+	public StreamingWriter get_streaming(int code, MimeType mime_type) {
 		return new StreamingWriter(ctx, code, mime_type);
 	}
 

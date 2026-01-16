@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.LastHttpContent;
+import su.rumishistem.rumi_java_http.Type.MimeType.MimeType;
 
 /**
  * ストリーム
@@ -23,12 +24,12 @@ public class StreamingWriter {
 	 * @param code ステータスコード
 	 * @param mime_type MimeType
 	 */
-	public StreamingWriter(ChannelHandlerContext ctx, int code, String mime_type) {
+	public StreamingWriter(ChannelHandlerContext ctx, int code, MimeType mime_type) {
 		this.ctx = ctx;
 
 		//ヘッダー部分
 		HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(code));
-		response.headers().set(HttpHeaderNames.CONTENT_TYPE, mime_type);
+		response.headers().set(HttpHeaderNames.CONTENT_TYPE, mime_type.get_as_mimetype());
 		response.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
 		ctx.write(response);
 	}

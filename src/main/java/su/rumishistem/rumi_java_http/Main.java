@@ -5,6 +5,7 @@ import su.rumishistem.rumi_java_http.Type.Request;
 import su.rumishistem.rumi_java_http.Type.Response;
 import su.rumishistem.rumi_java_http.Type.RouteEntry;
 import su.rumishistem.rumi_java_http.Type.StreamingWriter;
+import su.rumishistem.rumi_java_http.Type.MimeType.StandardMimeType;
 
 /**
  * デバッグ用
@@ -22,14 +23,14 @@ public class Main {
 				sb.append("/streaming		：ストリーミングテスト\n");
 				sb.append("/post				：POSTテスト\n");
 
-				return new Response(200, sb.toString().getBytes(), "text/plain; charset=UTF-8");
+				return new Response(200, sb.toString().getBytes(), StandardMimeType.Text.Plain);
 			}
 		});
 
 		http.set_route("/streaming", null, new RouteEntry() {
 			@Override
 			public Response run(Request r) {
-				StreamingWriter s = r.get_streaming(200, "text/plain; charset=UTF-8");
+				StreamingWriter s = r.get_streaming(200, StandardMimeType.Text.Plain);
 				s.write("ストリームテスト\n".getBytes());
 				s.write("にゃんにゃんこゃーんこにゃーん\n".getBytes());
 				s.close();
@@ -55,14 +56,14 @@ public class Main {
 				sb.append("	</BODY>");
 				sb.append("</HTML>");
 
-				return new Response(200, sb.toString().getBytes(), "text/html; charset=UTF-8");
+				return new Response(200, sb.toString().getBytes(), StandardMimeType.Text.HTML);
 			}
 		});
 
 		http.set_route("/post", Method.POST, new RouteEntry() {
 			@Override
 			public Response run(Request r) {
-				return new Response(200, ("あなたの送ったデータ↓\n" + r.get_body().get_as_string()).getBytes(), "text/plain; charset=UTF-8");
+				return new Response(200, ("あなたの送ったデータ↓\n" + r.get_body().get_as_string()).getBytes(), StandardMimeType.Text.Plain);
 			}
 		});
 

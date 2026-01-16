@@ -28,7 +28,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 			HttpRequest r = (HttpRequest)msg;
 			System.out.println("[ INFO ] HTTP Request: " + r.uri());
 
-			Map<String, String> url_param = new HashMap();
+			Map<String, String> url_param = new HashMap<>();
 			request_body = new ByteArrayOutputStream();
 
 			//メソッド
@@ -112,7 +112,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 						HttpResponseStatus.valueOf(route_response.code),
 						ctx.alloc().buffer().writeBytes(route_response.body)
 					);
-					response.headers().set(HttpHeaderNames.CONTENT_TYPE, route_response.mime_type);
+					response.headers().set(HttpHeaderNames.CONTENT_TYPE, route_response.mime_type.get_as_mimetype());
 					response.headers().setInt(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
 					ctx.writeAndFlush(response);
 				} else {
