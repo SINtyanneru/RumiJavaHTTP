@@ -14,14 +14,16 @@ public class Request {
 	private ByteArrayOutputStream body;
 	private Map<String, String> param;
 	private Exception ex;
+	private Map<String, String> header_list;
 
-	public Request(ChannelHandlerContext ctx, Method method, String path, Map<String, String> url_param, ByteArrayOutputStream body, Map<String, String> param) {
+	public Request(ChannelHandlerContext ctx, Method method, String path, Map<String, String> url_param, ByteArrayOutputStream body, Map<String, String> param, Map<String, String> header_list) {
 		this.ctx = ctx;
 		this.method = method;
 		this.path = path;
 		this.url_param = url_param;
 		this.body = body;
 		this.param = param;
+		this.header_list = header_list;
 	}
 
 	public void set_param(Map<String, String> param) {
@@ -85,5 +87,14 @@ public class Request {
 
 	public Exception get_ex() {
 		return ex;
+	}
+
+	/**
+	 * ヘッダーを取得します
+	 * @param key キー
+	 * @return 値
+	 */
+	public String get_header(String key) {
+		return header_list.get(key.toUpperCase());
 	}
 }

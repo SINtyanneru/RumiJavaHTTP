@@ -69,13 +69,20 @@ public class ServerHandler extends ChannelInboundHandlerAdapter{
 				}
 			}
 
+			//ヘッダー
+			Map<String, String> header_list = new HashMap<String, String>();
+			for (Map.Entry<String, String> header:r.headers()) {
+				header_list.put(header.getKey().toUpperCase(), header.getValue());
+			}
+
 			current_request = new Request(
 				ctx,
 				method,
 				path,
 				url_param,
 				request_body,
-				null
+				null,
+				header_list
 			);
 		} else if (msg instanceof HttpContent) {
 			//ボディー
