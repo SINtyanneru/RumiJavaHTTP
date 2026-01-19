@@ -23,6 +23,7 @@ public class StandardMimeType {
 	public class Image {
 		public static final MimeType PNG = new MimeType("image", "png", new HashMap<>());
 		public static final MimeType JPEG = new MimeType("image", "jpeg", new HashMap<>());
+		public static final MimeType GIF = new MimeType("image", "gif", new HashMap<>());
 		public static final MimeType SVG = new MimeType("image", "svg+xml", new HashMap<>());
 	}
 
